@@ -1,13 +1,20 @@
 {
-  "name": "react-tutorial",
-  "version": "0.0.0",
+  "name": "react-comments-box",
+  "version": "0.0.1",
   "description": "Code from the React tutorial.",
   "main": "server.js",
   "dependencies": {
     "body-parser": "^1.4.3",
     "express": "^4.4.5"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "react": "~0.12.2",
+    "grunt-react": "~0.9.0",
+    "grunt-express-server": "~0.4.19",
+    "grunt-contrib-watch": "~0.5.3",
+    "grunt-contrib-concat": "~0.3.0",
+    "grunt-jsmin-sourcemap": "~1.9.0"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js"
@@ -27,12 +34,5 @@
   },
   "bugs": {
     "url": "https://github.com/reactjs/react-tutorial/issues"
-  },
-  "homepage": "https://github.com/reactjs/react-tutorial",
-  "readme": "# React Tutorial\n\nThis is the React comment box example from [the React tutorial](http://facebook.github.io/react/docs/tutorial.html).\n\n## To use\n\nThere are several simple server implementations included. They all serve static files from `public/` and handle requests to `comments.json` to fetch or add data. Start a server with one of the following:\n\n### Node\n\n```sh\nnpm install\nnode server.js\n```\n\n### Python\n\n```sh\npip install -r requirements.txt\npython server.py\n```\n\n### Ruby\n```sh\nruby server.rb\n```\n\n### PHP\n```sh\nphp server.php\n```\n\n### Go\n```sh\ngo run server.go\n```\n\nAnd visit <http://localhost:3000/>. Try opening multiple tabs!\n",
-  "readmeFilename": "README.md",
-  "_id": "react-tutorial@0.0.0",
-  "_shasum": "d2b5c2daa9a036e6166ef0f86eb159836051aab5",
-  "_resolved": "git+ssh://git@al.github.com/reactjs/react-tutorial#17366cd34e193d3bb3f762608129c1fca951a9fa",
-  "_from": "react-tutorials@git+ssh://git@al.github.com/reactjs/react-tutorial"
+  }
 }
