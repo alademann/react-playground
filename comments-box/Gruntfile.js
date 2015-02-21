@@ -28,12 +28,19 @@ module.exports = function(grunt) {
             },
         },
         watch: {
-            files: [
-                'public/src/**/*.html',
-                'public/src/**/*.jsx',
-                'public/src/**/*.js',
-            ],
-            tasks: []
+            html: {
+                files: [
+                    'public/src/**/*.html'
+                ],
+                tasks: []
+            },
+            jsx: {
+                files: [
+                    'public/src/**/*.jsx',
+                    'public/src/**/*.js'
+                ],
+                tasks: ['updateJSX']
+            }
         },
         react: {
             dynamic_mappings: {
@@ -79,6 +86,8 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-concat');
     grunt.loadNpmTasks('grunt-jsmin-sourcemap');
 
-    grunt.registerTask('default', ['express', 'react', 'concat', 'watch']);
+    grunt.registerTask('updateJSX', ['react', 'concat']);
+
+    grunt.registerTask('default', ['express', 'updateJSX', 'watch']);
 
 };

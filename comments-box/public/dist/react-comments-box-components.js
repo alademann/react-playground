@@ -1,67 +1,49 @@
 /**
- * This file provided by Facebook is for non-commercial testing and evaluation purposes only.
- * Facebook reserves all rights not expressly granted.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
- * FACEBOOK BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN
- * ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
- * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ * React Comments Box Tutorial
  */
 
 var converter = new Showdown.converter();
 
-var Comment = React.createClass({
-  render: function() {
-    var rawMarkup = converter.makeHtml(this.props.children.toString());
-    return (
-      <div className="comment">
-        <h2 className="commentAuthor">
-          {this.props.author}
-        </h2>
-        <span dangerouslySetInnerHTML={{__html: rawMarkup}} />
-      </div>
-    );
-  }
-});
 
+/**
+ * @class
+ * Container for our comment box component(s)
+ */
 var CommentBox = React.createClass({
   loadCommentsFromServer: function() {
     $.ajax({
-      url: this.props.url,
+      url: this.props.commentUrl,
       dataType: 'json',
       success: function(data) {
         this.setState({data: data});
       }.bind(this),
       error: function(xhr, status, err) {
-        console.error(this.props.url, status, err.toString());
+        console.error(this.props.commentUrl, status, err.toString());
       }.bind(this)
     });
   },
   handleCommentSubmit: function(comment) {
+    // Optimistic update
     var comments = this.state.data;
-    comments.push(comment);
-    this.setState({data: comments}, function() {
-      // `setState` accepts a callback. To avoid (improbable) race condition,
-      // `we'll send the ajax request right after we optimistically set the new
-      // `state.
-      $.ajax({
-        url: this.props.url,
-        dataType: 'json',
-        type: 'POST',
-        data: comment,
-        success: function(data) {
-          this.setState({data: data});
-        }.bind(this),
-        error: function(xhr, status, err) {
-          console.error(this.props.url, status, err.toString());
-        }.bind(this)
-      });
+    console.log(comments);
+    var newComments = comments.concat([comment]);
+    this.setState({data: newComments});
+
+    $.ajax({
+      url: this.props.commentUrl,
+      dataType: 'json',
+      type: 'POST',
+      data: comment,
+      success: function(data) {
+        this.setState({data: data});
+      }.bind(this),
+      error: function(xhr, status, err) {
+        console.error(this.props.commentUrl, status, err.toString());
+      }.bind(this)
     });
   },
   getInitialState: function() {
-    return {data: []};
+    return {data: []}
   },
   componentDidMount: function() {
     this.loadCommentsFromServer();
@@ -69,7 +51,7 @@ var CommentBox = React.createClass({
   },
   render: function() {
     return (
-      <div className="commentBox">
+      <div className="comment-box">
         <h1>Comments</h1>
         <CommentList data={this.state.data} />
         <CommentForm onCommentSubmit={this.handleCommentSubmit} />
@@ -78,50 +60,89 @@ var CommentBox = React.createClass({
   }
 });
 
+
+/**
+ * @class
+ * Single comment
+ */
+var Comment = React.createClass({
+  render: function() {
+    var rawCommentHtml = converter.makeHtml(this.props.children.toString());
+    return (
+      <div className="comment">
+        <h2 className="comment-author">
+          {this.props.author}
+        </h2>
+        <span dangerouslySetInnerHTML={{__html: rawCommentHtml}} />
+      </div>
+    );
+  }
+});
+
+
+/**
+ * @class
+ * List of comments
+ */
 var CommentList = React.createClass({
   render: function() {
-    var commentNodes = this.props.data.map(function(comment, index) {
+    var commentNodes = this.props.data.map(function(comment) {
       return (
-        // `key` is a React-specific concept and is not mandatory for the
-        // purpose of this tutorial. if you're curious, see more here:
-        // http://facebook.github.io/react/docs/multiple-components.html#dynamic-children
-        <Comment author={comment.author} key={index}>
+        <Comment author={comment.author}>
           {comment.text}
         </Comment>
       );
     });
+
     return (
-      <div className="commentList">
+      <div className="comment-list">
         {commentNodes}
       </div>
     );
   }
 });
 
+
+/**
+ * @class
+ * Form where a new comment can be added to the list
+ */
 var CommentForm = React.createClass({
-  handleSubmit: function(e) {
-    e.preventDefault();
-    var author = this.refs.author.getDOMNode().value.trim();
-    var text = this.refs.text.getDOMNode().value.trim();
-    if (!text || !author) {
+  handleSubmit: function(event) {
+    event.preventDefault();
+
+    var $authorField = this.refs.commentAuthor.getDOMNode();
+    var $textField   = this.refs.commentText.getDOMNode();
+
+    var author = $authorField.value.trim();
+    var text   = $textField.value.trim();
+
+    if (!author || !text) {
       return;
     }
+
     this.props.onCommentSubmit({author: author, text: text});
-    this.refs.author.getDOMNode().value = '';
-    this.refs.text.getDOMNode().value = '';
+    $authorField.value = '';
+    $textField.value = '';
   },
   render: function() {
     return (
-      <form className="commentForm" onSubmit={this.handleSubmit}>
-        <input type="text" placeholder="Your name" ref="author" />
-        <input type="text" placeholder="Say something..." ref="text" />
+      <form className="comment-form" onSubmit={this.handleSubmit}>
+        <input type="text" placeholder="Your name" ref="commentAuthor" />
+        <input type="text" placeholder="Say something..." ref="commentText" />
         <input type="submit" value="Post" />
       </form>
     );
   }
 });
 
+
+/**
+ * @ignore
+ * Instantiates the root component, starts the React framework,
+ * and injects the markup into a raw DOM element (provided s the second argument)
+ */
 React.render(
-  <CommentBox url="comments.json" pollInterval={2000} />,
+  <CommentBox commentUrl="comments.json" pollInterval={2000} />,
   document.getElementById('content')
 );
